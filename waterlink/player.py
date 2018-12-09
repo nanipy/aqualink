@@ -15,6 +15,7 @@ class Player:
     __slots__ = (
         "connection",
         "track",
+        "equalizer",
         "_guild",
         "_channel",
         "_paused",
@@ -36,6 +37,7 @@ class Player:
         self._position = None
         self._volume = 100
         self._track_callback = None
+        self.equalizer = [0.0 for x in range(15)]
 
     @property
     def channel(self) -> Optional[VoiceChannel]:
