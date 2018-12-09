@@ -217,7 +217,7 @@ class Connection:
         """
         headers = {
             "Authorization": self._password,
-            # 'Accept': 'application/json'
+            "Accept": "application/json",
         }
         params = {"identifier": query}
         while True:
