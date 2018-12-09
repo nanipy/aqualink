@@ -136,19 +136,19 @@ class Connection:
             except websockets.ConnectionClosed:
                 raise Disconnected("The lavalink server closed the connection.")
 
-            op = data.get("op")
+            op = json.get("op")
 
             if op == "stats":
-                data.pop("op")
+                json.pop("op")
                 self.stats = data
-            elif op == "playerUpdate" and "position" in data["state"]:
-                player = self.get_player(int(data["guildId"]))
+            elif op == "playerUpdate" and "position" in json["state"]:
+                player = self.get_player(int(json["guildId"]))
 
-                lag = time.time() - data["state"]["time"] / 1000
-                player._position = data["state"]["position"] / 1000 + lag
+                lag = time.time() - json["state"]["time"] / 1000
+                player._position = json["state"]["position"] / 1000 + lag
             elif op == "event":
-                player = self.get_player(int(data["guildId"]))
-                self._loop.create_task(player._process_event(data))
+                player = self.get_player(int(json["guildId"]))
+                self._loop.create_task(player._process_event(json))
 
     async def _send(self, **data) -> None:
         if not self.connected:
