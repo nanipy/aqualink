@@ -22,6 +22,7 @@ from .track import Track
 
 class Connection:
     def __init__(self, bot: commands.Bot) -> None:
+        bot.add_listener(self._handler, 'on_socket_response')
         self.bot = bot
         self._loop = bot.loop
         self._sharded = isinstance(bot, commands.AutoShardedBot)
