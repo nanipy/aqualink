@@ -113,7 +113,6 @@ class Player:
         :param start_time: (optional) How far into the track to start playing (defaults to 0).
         :param end_time: (optional) At what point in the track to stop playing (defaults to track length).
         """
-        end_time = end_time or track.length
         await self.connection._play(self._guild, track.track, start_time, end_time)
         self._playing = True
 

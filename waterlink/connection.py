@@ -197,8 +197,8 @@ class Connection:
         self,
         guild_id: int,
         track: str,
+        start_time: float,
         end_time: Optional[float],
-        start_time: float = 0.0,
     ) -> None:
         if end_time is not None:
             await self._send(
