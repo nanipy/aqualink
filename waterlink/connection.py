@@ -31,6 +31,7 @@ class Connection:
         bot.waterlink = self
 
     async def connect(self, password: str, ws_url: str, rest_url: str) -> None:
+        await self.bot.wait_until_ready()
         if not hasattr(self, "session"):
             self.session = aiohttp.ClientSession(loop=self._loop)
         headers = {
