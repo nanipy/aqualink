@@ -39,6 +39,8 @@ class Connection:
             "User-Id": self.bot.user.id,
         }
         self._password = password
+        self._rest_url = rest_url
+        self._ws_url = ws_url
         self._socket = await websockets.connect(ws_url, extra_headers=headers)
         self._loop.create_task(self.event_processor())
         self._loop.create_task(self._discord_connection_state_loop())
