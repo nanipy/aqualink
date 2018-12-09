@@ -76,11 +76,11 @@ class Connection:
     async def _discord_connection_state_loop(self) -> None:
         while self.connected:
             shard_guilds = {}
-            for player in self._players:
+            for guild, player in self._players.items():
                 if not player.connected:
                     continue
 
-                shard_id = player.guild.shard_id
+                shard_id = (guild >> 22) % self._shard_count
 
                 try:
                     shard_guilds[shard_id].append(player)
