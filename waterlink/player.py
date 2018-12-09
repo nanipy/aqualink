@@ -38,14 +38,6 @@ class Player:
         self._volume = 100
         self._track_callback = None
         self.equalizer = [0.0 for x in range(15)]
-        self.bassboosts = {
-            "off": [(0, 0), (1, 0)],
-            "low": [(0, 0.25), (1, 0.15)],
-            "medium": [(0, 0.50), (1, 0.25)],
-            "high": [(0, 0.75), (1, 0.50)],
-            "insane": [(0, 1), (1, 0.75)],
-            "ultra": [(0, 1), (1, 2.0)],
-        }
 
     @property
     def channel(self) -> Optional[VoiceChannel]:
