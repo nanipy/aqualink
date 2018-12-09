@@ -94,7 +94,7 @@ class Connection:
                     self._down[shard] = True
                     continue
 
-                if shard in self.down:
+                if shard in self._down:
                     # the shard is online again
                     self._down.pop(shard)
                     self._loop.create_task(self._discord_reconnect_task(players))
