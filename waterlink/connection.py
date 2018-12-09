@@ -54,7 +54,7 @@ class Connection:
                 except KeyError:
                     shard_guilds[shard_id].append(player)
 
-            for shard, players in shard_guild_map.items():
+            for shard, players in shard_guilds.items():
                 ws = self._get_discord_ws(shard)
                 if not ws or not ws.open:
                     # the shard is down
@@ -67,16 +67,6 @@ class Connection:
                     self._loop.create_task(self._discord_reconnect_task(players))
 
             await asyncio.sleep(0.1)
-
-    async def event_processor(self) -> None:
-        await self.wait_until_ready()
-        while self.connected:
-            try:
-                json = ujson.loads(await self._socket.recv())
-            except websockets.ConnectionClosed:
-                raise Disconnected("The lavalink server closed the connection.")
-
-            print(json)
 
     async def _discord_reconnect_task(self, players) -> None:
         await asyncio.sleep(10)  # fixed wait for READY / RESUMED
@@ -104,3 +94,13 @@ class Connection:
         """Waits indefinitely until the Lavalink connection has been established."""
         while not self.connected:
             await asyncio.sleep(0.01)
+            
+    async def event_processor(self) -> None:
+        await self.wait_until_ready()
+        while self.connected:
+            try:
+                json = ujson.loads(await self._socket.recv())
+            except websockets.ConnectionClosed:
+                raise Disconnected("The lavalink server closed the connection.")
+
+            print(json)
