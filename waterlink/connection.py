@@ -19,7 +19,7 @@ from .exceptions import Disconnected
 
 class Connection:
     def __init__(self, bot: commands.Bot) -> None:
-        self._bot = bot
+        self.bot = bot
         self._loop = bot.loop
         self._sharded = isinstance(bot, commands.AutoShardedBot)
         self._shard_count = bot.shard_count if bot.shard_count is not None else 1
