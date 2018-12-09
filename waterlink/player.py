@@ -142,7 +142,7 @@ class Player:
         """Seeks to a specific position in a track."""
         await self.connection._seek(self._guild, position)
 
-    async def set_gain(self, band: int, gain: float=0.0):
+    async def set_gain(self, band: int, gain: float = 0.0):
         """Sets the equalizer gain."""
         await self.set_gains((band, gain))
 
@@ -151,7 +151,7 @@ class Player:
         update_package = []
         for value in gain_list:
             if not isinstance(value, tuple):
-                raise TypeError('gain_list must be a list of tuples')
+                raise TypeError("gain_list must be a list of tuples")
 
             band = value[0]
             gain = value[1]
@@ -160,10 +160,12 @@ class Player:
                 continue
 
             gain = max(min(float(gain), 1.0), -0.25)
-            update_package.append({'band': band, 'gain': gain})
+            update_package.append({"band": band, "gain": gain})
             self.equalizer[band] = gain
 
-        await self.connection._send(op='equalizer', guildId=self._guild, bands=update_package)
+        await self.connection._send(
+            op="equalizer", guildId=self._guild, bands=update_package
+        )
 
     async def reset_equalizer(self):
         """Resets equalizer to default values."""
