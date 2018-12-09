@@ -2,6 +2,7 @@ import websockets
 import aiohttp
 import ujson
 import asyncio
+import time
 
 try:
     import discord
@@ -29,6 +30,32 @@ class Connection:
         self._down = {}
         self._players = {}
         bot.waterlink = self
+
+    async def _handler(self, data):
+        if not self.connected:
+            return
+
+        if not data:
+            return
+        if data["op"] != 0:
+            return
+
+        if data["t"] == "VOICE_SERVER_UPDATE":
+            player = self.get_player(int(data["d"]["guild_id"]))
+            if not player._connecting:
+                return
+            else:
+                player._connecting = False
+
+            payload = {
+                "op": "voiceUpdate",
+                "guildId": data["d"]["guild_id"],
+                "sessionId": self.bot.get_guild(
+                    int(data["d"]["guild_id"])
+                ).me.voice.session_id,
+                "event": data["d"],
+            }
+            await self._send(**payload)
 
     async def connect(self, password: str, ws_url: str, rest_url: str) -> None:
         await self.bot.wait_until_ready()
@@ -109,7 +136,19 @@ class Connection:
             except websockets.ConnectionClosed:
                 raise Disconnected("The lavalink server closed the connection.")
 
-            print(json)
+            op = data.get("op")
+
+            if op == "stats":
+                data.pop("op")
+                self.stats = data
+            elif op == "playerUpdate" and "position" in data["state"]:
+                player = self.get_player(int(data["guildId"]))
+
+                lag = time.time() - data["state"]["time"] / 1000
+                player._position = data["state"]["position"] / 1000 + lag
+            elif op == "event":
+                player = self.get_player(int(data["guildId"]))
+                self._loop.create_task(player._process_event(data))
 
     async def _send(self, **data) -> None:
         if not self.connected:
