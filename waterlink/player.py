@@ -12,7 +12,7 @@ except ImportError:
 
 class Player:
     __slots__ = (
-        "conn",
+        "connection",
         "_guild",
         "_channel",
         "_paused",

@@ -140,7 +140,7 @@ class Connection:
 
             if op == "stats":
                 json.pop("op")
-                self.stats = data
+                self.stats = json
             elif op == "playerUpdate" and "position" in json["state"]:
                 player = self.get_player(int(json["guildId"]))
 
