@@ -13,7 +13,7 @@ except ImportError:
     except ImportError:
         raise ImportError("You don't have discord.py or discord.jspy installed!")
 
-from typing import Union, Optional
+from typing import Union, Optional, List
 from .exceptions import Disconnected
 from .player import Player
 from .track import Track
@@ -206,7 +206,7 @@ class Connection:
             self._players[guild_id] = player
         return player
 
-    async def query(self, query: str, *, retry_count=0, retry_delay=0) -> list[Track]:
+    async def query(self, query: str, *, retry_count=0, retry_delay=0) -> List[Track]:
         """
         Queries Lavalink. Returns a list of Track objects (dictionaries).
         :param query: The search query to make.
