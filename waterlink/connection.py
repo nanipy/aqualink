@@ -13,8 +13,10 @@ except ImportError:
     except ImportError:
         raise ImportError("You don't have discord.py or discord.jspy installed!")
 
-from typing import Union
+from typing import Union, Optional
 from .exceptions import Disconnected
+from .player import Player
+from .track import Track
 
 
 class Connection:
@@ -36,6 +38,7 @@ class Connection:
             "Num-Shards": self._shard_count,
             "User-Id": self.bot.user.id,
         }
+        self._password = password
         self._socket = await websockets.connect(ws_url, extra_headers=headers)
         self._loop.create_task(self.event_processor())
         self._loop.create_task(self._discord_connection_state_loop())
@@ -94,7 +97,7 @@ class Connection:
         """Waits indefinitely until the Lavalink connection has been established."""
         while not self.connected:
             await asyncio.sleep(0.01)
-            
+
     async def event_processor(self) -> None:
         await self.wait_until_ready()
         while self.connected:
@@ -104,3 +107,131 @@ class Connection:
                 raise Disconnected("The lavalink server closed the connection.")
 
             print(json)
+
+    async def _send(self, **data) -> None:
+        if not self.connected:
+            raise Disconnected()
+
+        try:
+            data["guildId"] = str(data["guildId"])
+            data["channelId"] = str(data["channelId"])
+        except KeyError:
+            pass
+        await self._socket.send(ujson.dumps(data))
+
+    async def _discord_disconnect(self, guild_id: int) -> None:
+        shard_id = (guild_id >> 22) % self._shard_count
+        await self._get_discord_ws(shard_id).send(
+            ujson.dumps(
+                {
+                    "op": 4,
+                    "d": {
+                        "self_deaf": False,
+                        "guild_id": str(guild_id),
+                        "channel_id": None,
+                        "self_mute": False,
+                    },
+                }
+            )
+        )
+
+    async def _discord_connect(self, guild_id: int, channel_id: int) -> None:
+        shard_id = (guild_id >> 22) % self._shard_count
+        await self._get_discord_ws(shard_id).send(
+            ujson.dumps(
+                {
+                    "op": 4,
+                    "d": {
+                        "self_deaf": False,
+                        "guild_id": str(guild_id),
+                        "channel_id": str(channel_id),
+                        "self_mute": False,
+                    },
+                }
+            )
+        )
+
+    async def _play(
+        self,
+        guild_id: int,
+        track: str,
+        end_time: Optional[float],
+        start_time: float = 0.0,
+    ) -> None:
+        if end_time is not None:
+            await self._send(
+                op="play",
+                guildId=guild_id,
+                track=track,
+                startTime=int(start_time * 1000),
+                endTime=int(end_time * 1000),
+            )
+        else:
+            await self._send(
+                op="play",
+                guildId=guild_id,
+                track=track,
+                startTime=int(start_time * 1000),
+            )
+
+    async def _pause_resume(self, guild_id: int, paused: bool) -> None:
+        await self._send(op="pause", guildId=guild_id, pause=paused)
+
+    async def _stop(self, guild_id: int) -> None:
+        await self._send(op="stop", guildId=guild_id)
+
+    async def _volume(self, guild_id: int, level: int) -> int:
+        level = max(min(level, 150), 0)  # no earrapes
+        await self._send(op="volume", guildId=guild_id, volume=level)
+        return level
+
+    async def _seek(self, guild_id: int, position: float) -> None:
+        position = int(position * 1000)
+        await self._send(op="seek", guildId=guild_id, position=position)
+
+    def get_player(self, guild_id: int) -> Player:
+        """
+        Gets a Player class that abstracts away connection handling, among other things.
+        You shouldn't be holding onto these for too long, rather you should be requesting them as necessary using this
+        method.
+        :param guild_id: The guild ID to get the player for.
+        :return: A Player instance for that guild.
+        """
+        if not isinstance(guild_id, int):
+            raise TypeError(f"Expected guild ID integer, got {type(guild_id).__name__}")
+        try:
+            player = self._players[guild_id]
+        except KeyError:
+            player = Player(self, guild_id)
+            self._players[guild_id] = player
+        return player
+
+    async def query(self, query: str, *, retry_count=0, retry_delay=0) -> list[Track]:
+        """
+        Queries Lavalink. Returns a list of Track objects (dictionaries).
+        :param query: The search query to make.
+        :param retry_count: How often to retry the query should it fail. 0 disables, -1 will try forever (dangerous).
+        :param retry_delay: How long to sleep for between retries.
+        """
+        headers = {
+            "Authorization": self._password,
+            # 'Accept': 'application/json'
+        }
+        params = {"identifier": query}
+        while True:
+            async with self.session.get(
+                f"{self._rest_url}/loadtracks", params=params
+            ) as resp:
+                out = await resp.json()
+
+            # -1 is not recommended unless you run it as a task which you cancel after a specific time, but
+            # you do you devs
+            if not out and (
+                retry_count > 0 or retry_count < 0
+            ):  # edge case where lavalink just returns nothing
+                retry_count -= 1
+                if retry_delay:
+                    await asyncio.sleep(retry_delay)
+            else:
+                break
+        return out
