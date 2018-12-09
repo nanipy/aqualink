@@ -24,6 +24,7 @@ class Track:
         self.position = self._info.get("position")
         self.title = self._info.get("title")
         self.url = self._info.get("uri")
+        self.thumbnail = f"https://img.youtube.com/vi/{self.identifier}/default.jpg" if 'youtube' in self.url else ""
 
     def __repr__(self):
         return (
