@@ -151,6 +151,7 @@ class Player:
 
         self._playing = False
         self._position = None
+        self.track = None
 
         if not self.track_callback:
             return
