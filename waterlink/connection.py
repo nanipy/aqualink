@@ -85,7 +85,7 @@ class Connection:
                 try:
                     shard_guilds[shard_id].append(player)
                 except KeyError:
-                    shard_guilds[shard_id].append(player)
+                    shard_guilds[shard_id] = [player]
 
             for shard, players in shard_guilds.items():
                 ws = self._get_discord_ws(shard)
