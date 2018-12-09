@@ -220,7 +220,7 @@ class Connection:
         params = {"identifier": query}
         while True:
             async with self.session.get(
-                f"{self._rest_url}/loadtracks", params=params
+                f"{self._rest_url}/loadtracks", params=params, headers=headers
             ) as resp:
                 out = await resp.json()
 
