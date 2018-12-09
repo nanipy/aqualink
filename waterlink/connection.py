@@ -76,7 +76,7 @@ class Connection:
             except websockets.ConnectionClosed:
                 raise Disconnected("The lavalink server closed the connection.")
 
-            print(data)
+            print(json)
 
     async def _discord_reconnect_task(self, players) -> None:
         await asyncio.sleep(10)  # fixed wait for READY / RESUMED
