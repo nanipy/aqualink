@@ -224,7 +224,7 @@ class Connection:
             async with self.session.get(
                 f"{self._rest_url}/loadtracks", params=params
             ) as resp:
-                out = await resp.json()
+                return await resp.text()
 
             # -1 is not recommended unless you run it as a task which you cancel after a specific time, but
             # you do you devs
