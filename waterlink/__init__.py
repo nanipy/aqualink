@@ -1,3 +1,3 @@
 from .connection import *
-from .client import *
+from .player import *
 from .exceptions import *
