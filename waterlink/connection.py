@@ -222,7 +222,7 @@ class Connection:
             async with self.session.get(
                 f"{self._rest_url}/loadtracks", params=params
             ) as resp:
-                out = await resp.json()
+                out = await resp.text()
 
             # -1 is not recommended unless you run it as a task which you cancel after a specific time, but
             # you do you devs
@@ -234,4 +234,5 @@ class Connection:
                     await asyncio.sleep(retry_delay)
             else:
                 break
+        return out[0:2000]
         return [Track(**data) for data in out["tracks"]]
