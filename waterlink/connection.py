@@ -215,10 +215,7 @@ class Connection:
         :param retry_count: How often to retry the query should it fail. 0 disables, -1 will try forever (dangerous).
         :param retry_delay: How long to sleep for between retries.
         """
-        headers = {
-            "Authorization": self._password,
-            "Accept": "application/json",
-        }
+        headers = {"Authorization": self._password, "Accept": "application/json"}
         params = {"identifier": query}
         while True:
             async with self.session.get(
