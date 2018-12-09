@@ -22,7 +22,7 @@ from .track import Track
 
 class Connection:
     def __init__(self, bot: commands.Bot) -> None:
-        bot.add_listener(self._handler, 'on_socket_response')
+        bot.add_listener(self._handler, "on_socket_response")
         self.bot = bot
         self._loop = bot.loop
         self._sharded = isinstance(bot, commands.AutoShardedBot)
@@ -195,11 +195,7 @@ class Connection:
         )
 
     async def _play(
-        self,
-        guild_id: int,
-        track: str,
-        start_time: float,
-        end_time: Optional[float],
+        self, guild_id: int, track: str, start_time: float, end_time: Optional[float]
     ) -> None:
         if end_time is not None:
             await self._send(

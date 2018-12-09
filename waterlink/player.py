@@ -14,6 +14,7 @@ except ImportError:
 class Player:
     __slots__ = (
         "connection",
+        "track",
         "_guild",
         "_channel",
         "_paused",
@@ -26,6 +27,7 @@ class Player:
 
     def __init__(self, connection, guild_id: int) -> None:
         self.connection = connection
+        self.track = None
         self._guild = guild_id
         self._connecting = False
         self._channel = None
@@ -115,6 +117,7 @@ class Player:
         """
         await self.connection._play(self._guild, track.track, start_time, end_time)
         self._playing = True
+        self.track = track
 
     async def set_pause(self, paused: bool):
         """Sets the pause state."""
