@@ -26,6 +26,7 @@ class Connection:
         self._socket = None
         self._down = {}
         self._players = {}
+        bot.waterlink = self
 
     async def connect(self, password: str, ws_url: str, rest_url: str) -> None:
         if not hasattr(self, "session"):
