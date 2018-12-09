@@ -1,5 +1,6 @@
 from inspect import isawaitable, signature
 from typing import Optional, Callable
+from .track import Track
 
 try:
     from discord import VoiceChannel, Guild
@@ -105,14 +106,15 @@ class Player:
         """Shortcut method for :meth:`Connection.query`."""
         return await self.connection.query(*args, **kwargs)
 
-    async def play(self, track: str, start_time: float = 0.0, end_time: float = None):
+    async def play(self, track: Track, start_time: float = 0.0, end_time: float = None):
         """
         Plays a track. If already playing, replaces the current track.
         :param track: A base64 track ID returned by the :meth:`Connection.query` method.
         :param start_time: (optional) How far into the track to start playing (defaults to 0).
         :param end_time: (optional) At what point in the track to stop playing (defaults to track length).
         """
-        await self.connection._play(self._guild, track, start_time, end_time)
+        end_time = end_time or track.length
+        await self.connection._play(self._guild, track.track, start_time, end_time)
         self._playing = True
 
     async def set_pause(self, paused: bool):
