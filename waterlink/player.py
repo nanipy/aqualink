@@ -148,6 +148,10 @@ class Player:
         """Sets the equalizer gain."""
         await self.set_gains((band, gain))
 
+    async def set_eq(self, gain_list):
+        """Use a premade Equalizer."""
+        await self.set_gains(*gain_list)
+
     async def set_gains(self, *gain_list):
         """Modifies the player's equalizer settings."""
         update_package = []
