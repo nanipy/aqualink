@@ -27,7 +27,7 @@ class Track:
 
     def __repr__(self):
         return (
-            f"<Track title={self.title} length={self.lenght}>"
+            f"<Track title={self.title} length={self.length}>"
             if self.title and self.length
             else f"<Track track={self.track}>"
         )
