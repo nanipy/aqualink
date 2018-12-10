@@ -1,5 +1,5 @@
 from inspect import isawaitable, signature
-from typing import Optional, Callable
+from typing import Optional, Callable, List
 from .track import Track
 
 try:
@@ -101,16 +101,18 @@ class Player:
         await self.connection._discord_connect(self._guild, channel_id)
         self._channel = channel_id
 
-    async def disconnect(self):
+    async def disconnect(self) -> None:
         """Disconnects the player from Discord."""
         await self.connection._discord_disconnect(self._guild)
         self._channel = None
 
-    async def query(self, *args, **kwargs):
+    async def query(self, *args, **kwargs) -> List[Track]:
         """Shortcut method for :meth:`Connection.query`."""
         return await self.connection.query(*args, **kwargs)
 
-    async def play(self, track: Track, start_time: float = 0.0, end_time: float = None):
+    async def play(
+        self, track: Track, start_time: float = 0.0, end_time: float = None
+    ) -> None:
         """
         Plays a track. If already playing, replaces the current track.
         :param track: A base64 track ID returned by the :meth:`Connection.query` method.
@@ -121,30 +123,30 @@ class Player:
         self._playing = True
         self.track = track
 
-    async def set_pause(self, paused: bool):
+    async def set_pause(self, paused: bool) -> None:
         """Sets the pause state."""
         if paused == self._paused:
             return
         await self.connection._pause(self._guild, paused)
         self._paused = paused
 
-    async def set_volume(self, volume: int):
+    async def set_volume(self, volume: int) -> None:
         """
         Sets the player's volume.
         :param volume: An integer between (and including) 0 and 150.
         """
         self._volume = await self.connection._volume(self._guild, volume)
 
-    async def stop(self):
+    async def stop(self) -> None:
         """Stops the player."""
         await self.connection._stop(self._guild)
         self._playing = False
 
-    async def seek(self, position: float):
+    async def seek(self, position: float) -> None:
         """Seeks to a specific position in a track."""
         await self.connection._seek(self._guild, position)
 
-    async def set_gain(self, band: int, gain: float = 0.0):
+    async def set_gain(self, band: int, gain: float = 0.0) -> None:
         """Sets the equalizer gain."""
         await self.set_gains((band, gain))
 
@@ -152,7 +154,7 @@ class Player:
         """Use a premade Equalizer."""
         await self.set_gains(*gain_list)
 
-    async def set_gains(self, *gain_list):
+    async def set_gains(self, *gain_list) -> None:
         """Modifies the player's equalizer settings."""
         update_package = []
         for value in gain_list:
@@ -173,11 +175,11 @@ class Player:
             op="equalizer", guildId=self._guild, bands=update_package
         )
 
-    async def reset_equalizer(self):
+    async def reset_equalizer(self) -> None:
         """Resets equalizer to default values."""
         await self.set_gains(*[(x, 0.0) for x in range(15)])
 
-    async def _process_event(self, data):
+    async def _process_event(self, data) -> None:
         if data["op"] != "event":
             return
 

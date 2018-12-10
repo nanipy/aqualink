@@ -30,7 +30,7 @@ class Connection:
         self._socket = None
         self._down = {}
         self._players = {}
-        bot.waterlink = self
+        bot.aqualink = self
 
     async def _handler(self, data):
         if not self.connected:
