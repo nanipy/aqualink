@@ -15,7 +15,7 @@ await bot.aqualink.connect(password="youshallnotpass", ws_url="ws://localhost:23
 
 # later
 p = bot.aqualink.get_player(ctx.guild.id) # get the player object
-await p.connect(ctx.voice_client.channel.id) # connect to the author's VC 
+await p.connect(ctx.author.voice.channel.id) # connect to the author's VC 
 tracks = await p.query("ytsearch: hello Adele") # get a list of Track objects
 await p.play(tracks[0]) # play the first match
 await p.set_eq(aqualink.Equalizer.bassboost().ultra) # equalizer support! Ultimate bassboost preset
