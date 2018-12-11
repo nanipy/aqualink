@@ -14,3 +14,8 @@ Track
 -----
 .. autoclass:: Track
     :members:
+
+Equalizer
+---------
+.. autoclass:: Equalizer
+    :members:
