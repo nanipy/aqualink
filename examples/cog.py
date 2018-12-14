@@ -33,7 +33,7 @@ class Music:
         else:
             self.queue[ctx.guild] = [ctx.channel, []]
             await ctx.send(f"Playing {track.title}")
-        player.track_callback = track_callback  # set an event for track end
+        player.track_callback = self.track_callback  # set an event for track end
 
     @commands.command()
     async def skip(self, ctx):
