@@ -32,10 +32,10 @@ class Music:
             await player.connect(ctx.author.voice.channel.id)
         tracks = await player.query(f"ytsearch: {query}")
         track = tracks[0]
-        if self.queue.get(ctx.guild):
+        if self.queue.get(ctx.guild) and player.playing: # if the queue is filled and if the player is playing
             self.queue[ctx.guild][1].append(track)
             await ctx.send(f"Added {track.title} to the queue")
-        else:
+        if not player.playing: # if the player is not playing
             self.queue[ctx.guild] = [ctx.channel, []]
             await player.play(track) # plays the track
             await ctx.send(f"Playing {track.title}")
