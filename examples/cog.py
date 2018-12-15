@@ -8,6 +8,11 @@ class Music:
     def __init__(self, bot):
         self.bot = bot
         self.queue = {}  # {guild: [text channel, [queued songs]]}
+        bot.loop.create_task(self.connect())
+
+    async def connect(self):
+        aqualink.Connection(self.bot)
+        await self.bot.aqualink.connect(password="youshallnotpass", ws_url="ws://localhost:2333", rest_url="http://localhost:2333")
 
     async def track_callback(self, player):
         """A callback invoked when the song is done playing."""
@@ -46,16 +51,18 @@ class Music:
         else:
             await ctx.send("I'm not playing...")
 
-    @commands.command()
-    async def queue(self, ctx):
+    @commands.command(name="queue", aliases=["q"])
+    async def _queue(self, ctx):
         """Shows up to 5 queued songs."""
         player = self.bot.aqualink.get_player(ctx.guild.id)
         queue = self.queue.get(ctx.guild)
         if not queue:
             return await ctx.send("I am not playing at all.")
         queue = queue[1][:5]
-        queue_text = "\n".join(f"{t['title']} by {t['author']}" for t in queue)
-        await ctx.send(queue)
+        if not queue:
+            return await ctx.send("No more upcoming tracks...")
+        queue_text = "\n".join(f"{t.title} by {t.author}" for t in queue)
+        await ctx.send(queue_text)
 
     @commands.command(aliases=["np"])
     async def now_playing(self, ctx):
@@ -67,8 +74,8 @@ class Music:
         em = discord.Embed(title=f"Playing in {ctx.guild}")
         em.add_field(name="Track", value=track.title)
         em.add_field(name="Author", value=track.author)
-        em.add_field(name="Length", value=str(timedelta(seconds=track.length)))
-        em.add_field(name="Position", value=str(timedelta(seconds=track.position)))
+        em.add_field(name="Length", value=str(timedelta(milliseconds=track.length)))
+        em.add_field(name="Position", value=str(timedelta(milliseconds=track.position)))
         em.add_field(name="Volume", value=f"{player.volume}%")
         em.set_thumbnail(url=track.thumbnail)
         await ctx.send(embed=em)
