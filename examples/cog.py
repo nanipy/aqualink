@@ -29,7 +29,7 @@ class Music:
         track = tracks[0]
         if self.queue.get(ctx.guild):
             self.queue[ctx.guild][1].append(track)
-            await ctx.send(f"Added {t[0].title} to the queue")
+            await ctx.send(f"Added {track.title} to the queue")
         else:
             self.queue[ctx.guild] = [ctx.channel, []]
             await ctx.send(f"Playing {track.title}")
