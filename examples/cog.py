@@ -19,6 +19,7 @@ class Music:
         queue_data = self.queue[player.guild]  # get the queue data
         if not queue_data[1]:  # no more songs left
             await player.disconnect()  # stop the player
+            del self.queue[player.guild]
         else:
             track = queue_data[1].pop(0)  # get the next song
             await player.play(track)  # play it
