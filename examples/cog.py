@@ -32,6 +32,7 @@ class Music:
             await ctx.send(f"Added {track.title} to the queue")
         else:
             self.queue[ctx.guild] = [ctx.channel, []]
+            await player.play(track) #plays the track
             await ctx.send(f"Playing {track.title}")
         player.track_callback = self.track_callback  # set an event for track end
 
