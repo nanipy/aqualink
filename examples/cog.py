@@ -34,7 +34,7 @@ class Music:
         tracks = await player.query(f"ytsearch: {query}")
         track = tracks[0]
         if self.queue.get(ctx.guild):
-            if "https://www.youtube.com/playlist" in query or "https://youtube.com/playlist" in query: # it is a playlist
+            if "youtube.com/playlist" in query: # it is a playlist
                 self.queue[ctx.guild][1].extend(tracks) # add all to the queue
                 await ctx.send(f"Added {len(tracks)} to the queue.")
             else:
@@ -105,6 +105,7 @@ class Music:
         if not player.connected or not ctx.guild.me.voice:
             return await ctx.send("I'm not playing.")
         player.track_callback = None  # prevent unusual behavior
+        del self.queue[ctx.guild]
         await player.stop()
         await player.disconnect()
         await ctx.send("Stopped.")
