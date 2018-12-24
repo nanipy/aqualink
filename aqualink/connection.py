@@ -21,7 +21,7 @@ from .track import Track
 
 
 class Connection:
-    def __init__(self, bot: commands.Bot) -> None:
+    def __init__(self, bot: Union[commands.Bot, commands.AutoShardedBot]) -> None:
         bot.add_listener(self._handler, "on_socket_response")
         self.bot = bot
         self._loop = bot.loop
@@ -30,7 +30,10 @@ class Connection:
         self._socket = None
         self._down = {}
         self._players = {}
-        bot.aqualink = self
+
+    @classmethod
+    async def connect_to(cls, bot: commands.Bot, *args, **kwargs):
+        bot.aqualink = cls(bot, *args, **kwargs)
 
     async def _handler(self, data):
         if not self.connected:
@@ -142,11 +145,13 @@ class Connection:
             if op == "stats":
                 json.pop("op")
                 self.stats = json
+
             elif op == "playerUpdate" and "position" in json["state"]:
                 player = self.get_player(int(json["guildId"]))
 
                 lag = time.time() - json["state"]["time"] / 1000
                 player._position = json["state"]["position"] / 1000 + lag
+
             elif op == "event":
                 player = self.get_player(int(json["guildId"]))
                 self._loop.create_task(player._process_event(json))

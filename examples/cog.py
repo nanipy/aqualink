@@ -6,19 +6,29 @@ from datetime import timedelta
 
 class Music:
     def __init__(self, bot):
+        self.playlist_urls = (
+            "https://youtube.com/playlist",
+            "https://youtu.be/",
+            "https://www.youtube.com/playlist",
+        )  # ToDo: Find more of these
         self.bot = bot
         self.queue = {}  # {guild: [text channel, [queued songs]]}
         bot.loop.create_task(self.connect())
 
     async def connect(self):
         aqualink.Connection(self.bot)
-        await self.bot.aqualink.connect(password="youshallnotpass", ws_url="ws://localhost:2333", rest_url="http://localhost:2333")
+        await self.bot.aqualink.connect(
+            password="youshallnotpass",
+            ws_url="ws://localhost:2333",
+            rest_url="http://localhost:2333",
+        )
 
     async def track_callback(self, player):
         """A callback invoked when the song is done playing."""
         queue_data = self.queue[player.guild]  # get the queue data
         if not queue_data[1]:  # no more songs left
             await player.disconnect()  # stop the player
+            del self.queue[player.guild]
         else:
             track = queue_data[1].pop(0)  # get the next song
             await player.play(track)  # play it
@@ -30,15 +40,31 @@ class Music:
         player = self.bot.aqualink.get_player(ctx.guild.id)
         if not ctx.guild.me.voice:
             await player.connect(ctx.author.voice.channel.id)
-        tracks = await player.query(f"ytsearch: {query}")
+        if query.startswith(self.playlist_urls):  # it is a playlist
+            is_playlist = True
+            tracks = await player.query(query)
+        else:
+            is_playlist = False
+            tracks = await player.query(f"ytsearch: {query}")
         track = tracks[0]
         if self.queue.get(ctx.guild):
-            self.queue[ctx.guild][1].append(track)
-            await ctx.send(f"Added {track.title} to the queue")
+            if is_playlist:
+                self.queue[ctx.guild][1].extend(tracks)  # add all to the queue
+                await ctx.send(
+                    f"Added a playlist with {len(tracks)} tracks to the queue."
+                )
+            else:
+                self.queue[ctx.guild][1].append(track)
+                await ctx.send(f"Added {track.title} to the queue")
         else:
-            self.queue[ctx.guild] = [ctx.channel, []]
-            await player.play(track) # plays the track
-            await ctx.send(f"Playing {track.title}")
+            if is_playlist:
+                self.queue[ctx.guild] = [ctx.channel, tracks[1:]]
+                await player.play(track)
+                await ctx.send(f"Playing a playlist with {len(tracks)} tracks.")
+            else:
+                self.queue[ctx.guild] = [ctx.channel, []]
+                await player.play(track)  # plays the track
+                await ctx.send(f"Playing {track.title}")
         player.track_callback = self.track_callback  # set an event for track end
 
     @commands.command()
@@ -100,6 +126,7 @@ class Music:
         if not player.connected or not ctx.guild.me.voice:
             return await ctx.send("I'm not playing.")
         player.track_callback = None  # prevent unusual behavior
+        del self.queue[ctx.guild]
         await player.stop()
         await player.disconnect()
         await ctx.send("Stopped.")
