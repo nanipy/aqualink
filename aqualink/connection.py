@@ -32,8 +32,8 @@ class Connection:
         self._players = {}
 
     @classmethod
-    async def connect_to(cls, bot: commands.Bot, *args, **kwargs):
-        bot.aqualink = cls(bot, *args, **kwargs)
+    async def connect_to(cls, bot: Union[commands.Bot, commands.AutoShardedBot]):
+        bot.aqualink = cls(bot)
 
     async def _handler(self, data):
         if not self.connected:

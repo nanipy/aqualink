@@ -127,7 +127,7 @@ class Player:
         """Sets the pause state."""
         if paused == self._paused:
             return
-        await self.connection._pause(self._guild, paused)
+        await self.connection._pause_resume(self._guild, paused)
         self._paused = paused
 
     async def set_volume(self, volume: int) -> None:
