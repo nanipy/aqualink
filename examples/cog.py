@@ -48,17 +48,11 @@ class Music:
             tracks = await player.query(f"ytsearch: {query}")
         track = tracks[0]
         if self.queue.get(ctx.guild):
-<<<<<<< HEAD
             if is_playlist:
                 self.queue[ctx.guild][1].extend(tracks)  # add all to the queue
                 await ctx.send(
                     f"Added a playlist with {len(tracks)} tracks to the queue."
                 )
-=======
-            if "youtube.com/playlist" in query: # it is a playlist
-                self.queue[ctx.guild][1].extend(tracks) # add all to the queue
-                await ctx.send(f"Added {len(tracks)} to the queue.")
->>>>>>> 592a53e2f584438110683b62b1bd203aae1af826
             else:
                 self.queue[ctx.guild][1].append(track)
                 await ctx.send(f"Added {track.title} to the queue")
