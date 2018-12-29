@@ -16,7 +16,7 @@ class Music:
         bot.loop.create_task(self.connect())
 
     async def connect(self):
-        aqualink.Connection(self.bot)
+        aqualink.Connection.connect_to(self.bot)
         await self.bot.aqualink.connect(
             password="youshallnotpass",
             ws_url="ws://localhost:2333",
