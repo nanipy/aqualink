@@ -32,7 +32,7 @@ class Connection:
         self._players = {}
 
     @classmethod
-    async def connect_to(cls, bot: Union[commands.Bot, commands.AutoShardedBot]):
+    def connect_to(cls, bot: Union[commands.Bot, commands.AutoShardedBot]):
         bot.aqualink = cls(bot)
 
     async def _handler(self, data):
